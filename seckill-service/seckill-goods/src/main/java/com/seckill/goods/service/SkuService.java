@@ -12,6 +12,17 @@ public interface SkuService {
 
 
 
+
+    /**
+     * 分页加载
+     */
+    List<Sku> list(int page, int size);
+
+    /**
+     * 总数量加载
+     */
+    Integer count();
+
     /**
      * Sku多条件分页查询
      */

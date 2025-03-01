@@ -13,6 +13,20 @@ import java.util.List;
 @FeignClient(value = "seckill-goods")
 public interface SkuFeign {
 
+
+    /**
+     * 分页查询-查询总数量
+     */
+    @GetMapping(value = "/sku/count")
+    Integer count();
+
+
+    /**
+     * 分页查询集合列表
+     */
+    @GetMapping(value = "/sku/list/{page}/{size}")
+    List<Sku> list(@PathVariable(value = "page") Integer page, @PathVariable(value = "size") Integer size);
+
     /**
      * 锁定商品
      */

@@ -23,6 +23,23 @@ public class SkuController {
 
 
 
+    /**
+     * Sku分页条件加载
+     */
+    @GetMapping(value = "/list/{page}/{size}" )
+    public List<Sku> list(@PathVariable  int page, @PathVariable  int size){
+        //调用SkuService实现分页条件查询Sku
+        List<Sku> skus = skuService.list(page, size);
+        return skus;
+    }
+
+    /**
+     * 分页查询-查询总数量
+     */
+    @GetMapping(value = "/count")
+    public Integer count() {
+        return skuService.count();
+    }
 
     /**
      * 删除指定商品
