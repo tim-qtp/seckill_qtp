@@ -8,6 +8,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * @author http://www.itheima.com
  */
 @SpringBootApplication
+@EnableFeignClients(basePackages = {"com.seckill.search.feign","com.seckill.page.feign"})
 public class CanalApplication {
 
     public static void main(String[] args) {

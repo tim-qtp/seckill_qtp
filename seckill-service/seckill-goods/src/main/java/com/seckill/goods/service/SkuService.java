@@ -11,7 +11,10 @@ import java.util.List;
 public interface SkuService {
 
 
-
+    /**
+     * 批量插入测试
+     */
+    void batch(List<Sku> list);
 
     /**
      * 分页加载

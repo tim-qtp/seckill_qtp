@@ -12,10 +12,14 @@ import com.seckill.goods.service.SkuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author http://www.itheima.com
@@ -35,6 +39,38 @@ public class SkuServiceImpl implements SkuService {
     @Autowired
     private RedisTemplate redisTemplate;
 
+
+    /**
+     * 批量插入测试
+     */
+    @Transactional
+    public void batch(List<Sku> list) {
+        // 1. 逐条插入
+//         list.forEach((sku -> skuMapper.insertSelective(sku)));
+
+        // 2. 一次插入多条
+//         skuMapper.batch(list);
+
+        // 3. 多线程
+        ExecutorService pool = Executors.newFixedThreadPool(4);
+        int page = 1000;
+        int count = list.size() / page;
+        CountDownLatch countDownLatch = new CountDownLatch(count);
+
+        for (int i = 0; i < count; i++) {
+            int finalI = i;
+            pool.execute(() -> {
+                skuMapper.batch(list.subList(finalI * page, (finalI + 1) * page));
+                countDownLatch.countDown();
+            });
+        }
+
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * 分页加载
