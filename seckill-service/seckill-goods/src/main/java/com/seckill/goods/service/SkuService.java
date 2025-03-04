@@ -12,6 +12,16 @@ public interface SkuService {
 
 
     /**
+     * 库存递减
+     */
+    int dcount(String id, Integer count);
+
+    /**
+     * 热点商品隔离
+     */
+    void hotIsolation(String id);
+
+    /**
      * 批量插入测试
      */
     void batch(List<Sku> list);

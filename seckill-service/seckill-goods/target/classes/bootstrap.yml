@@ -21,13 +21,13 @@ spring:
   redis:
     cluster:
       nodes:
-        - redis-server:7001
-        - redis-server:7002
-        - redis-server:7003
-        - redis-server:7004
-        - redis-server:7005
-        - redis-server:7006
-    password: zgfD4T8h1KjV
+        - redis-server:6381
+        - redis-server:6382
+        - redis-server:6383
+        - redis-server:6384
+        - redis-server:6385
+        - redis-server:6386
+#    password: zgfD4T8h1KjV
   main:
     allow-bean-definition-overriding: true
 logging:

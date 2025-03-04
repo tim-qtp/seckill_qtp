@@ -22,6 +22,44 @@ public class SkuController {
     private SkuService skuService;
 
 
+    /**
+     * 库存递减
+     */
+    @PutMapping(value = "/dcount/{id}/{count}")
+    public Result<Sku> dcount(@PathVariable(value = "id") String id, @PathVariable(value = "count") Integer count) {
+        //1.调用业务层实现递减
+        int code = skuService.dcount(id, count);
+        String message = "";
+        Sku sku = null;
+        switch (code) {
+            case StatusCode.DECOUNT_OK:
+                sku = skuService.findById(id);
+                message = "库存递减成功！";
+                break;
+            case StatusCode.DECOUNT_NUM:
+                message = "库存不足！";
+                break;
+            case StatusCode.DECOUNT_HOT:
+                message = "商品是热点商品！";
+                break;
+            default:
+        }
+        //3.根据状态码，响应不同的提示信息
+        return new Result<>(true, code, message, sku);
+    }
+
+    /***
+     * 热点商品隔离
+     */
+    @PostMapping(value = "/hot/isolation")
+    public Result hotIsolation(@RequestParam List<String> ids){
+        if(ids!=null && ids.size()>0){
+            for (String id : ids) {
+                skuService.hotIsolation(id);
+            }
+        }
+        return new Result(true,StatusCode.OK,"热点商品隔离成功！");
+    }
 
     /**
      * Sku分页条件加载

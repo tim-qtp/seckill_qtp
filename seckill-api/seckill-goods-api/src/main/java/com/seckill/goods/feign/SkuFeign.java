@@ -13,6 +13,17 @@ import java.util.List;
 @FeignClient(value = "seckill-goods")
 public interface SkuFeign {
 
+    /**
+     * Sku数量递减
+     */
+    @PutMapping(value = "/sku/dcount/{id}/{count}" )
+    Result<Sku> dcount(@PathVariable(value = "id")String id, @PathVariable(value = "count")Integer count);
+
+    /***
+     * 热点商品隔离
+     */
+    @PostMapping(value = "/sku/hot/isolation")
+    Result hotIsolation(@RequestParam List<String> ids);
 
     /**
      * 分页查询-查询总数量

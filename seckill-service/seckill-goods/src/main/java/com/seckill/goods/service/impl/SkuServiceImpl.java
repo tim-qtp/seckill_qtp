@@ -9,6 +9,7 @@ import com.seckill.goods.pojo.Activity;
 import com.seckill.goods.pojo.Sku;
 import com.seckill.goods.pojo.SkuAct;
 import com.seckill.goods.service.SkuService;
+import com.seckill.util.StatusCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,63 @@ public class SkuServiceImpl implements SkuService {
     @Autowired
     private RedisTemplate redisTemplate;
 
+    /**
+     * 库存递减
+     */
+    @Override
+    public int dcount(String id, Integer count) {
+        //1.调用Dao实现递减
+        int dcount = skuMapper.dcount(id, count);
+        //2.递减失败
+        if (dcount == 0) {
+            //查询
+            Sku sku = skuMapper.selectByPrimaryKey(id);
+            //2.1递减失败原因->库存不足->405
+            if (sku.getSeckillNum() < count) {
+                return StatusCode.DECOUNT_NUM;
+            } else if (sku.getIslock() == 2) {
+                //2.2递减失败原因->变成热点->205
+                return StatusCode.DECOUNT_HOT;
+            }
+            return 0;
+        }
+        return StatusCode.DECOUNT_OK;
+    }
+
+    /**
+     * 热点商品隔离
+     */
+    @Override
+    public void hotIsolation(String id) {
+        //1.数据库该商品进行锁定操作
+        Sku sku = new Sku();
+        sku.setIslock(2);   //锁定
+
+        Example example = new Example(Sku.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("islock", 1);
+        criteria.andEqualTo("id", id);
+        //执行锁定
+        int count = skuMapper.updateByExampleSelective(sku, example);
+
+        //2.锁定成功了，则把商品存入到Redis缓存进行隔离
+        if (count > 0) {
+            String key = "SKU_" + id;
+            Sku currentSku = skuMapper.selectByPrimaryKey(id);
+
+            //2.数据合并,处理多次数据库操作的事务问题
+            Map<String, Object> dataMap = new HashMap<String, Object>();
+            dataMap.put("num", currentSku.getSeckillNum());
+            //存储商品信息
+            Map<String, Object> info = new HashMap<String, Object>();
+            info.put("id", id);
+            info.put("price", currentSku.getSeckillPrice());
+            info.put("name", currentSku.getName());
+            dataMap.put("info", info);
+            //1.2次操作合并成1次
+            redisTemplate.boundHashOps(key).putAll(dataMap);
+        }
+    }
 
     /**
      * 批量插入测试

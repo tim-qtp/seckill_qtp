@@ -3,6 +3,10 @@ server:
 spring:
   application:
     name: seckill-monitor
+  datasource: # Druid
+    driver-class-name: org.apache.calcite.avatica.remote.Driver
+    url: jdbc:avatica:remote:url=http://druid-server:8888/druid/v2/sql/avatica/
+    type: com.alibaba.druid.pool.DruidDataSource
   cloud:
     nacos:
       config:
@@ -11,6 +15,20 @@ spring:
       discovery:
         #Nacos的注册地址
         server-addr: nacos-server:8848
+  redis:
+    cluster:
+      nodes:
+        - redis-server:6381
+        - redis-server:6382
+        - redis-server:6383
+        - redis-server:6384
+        - redis-server:6385
+        - redis-server:6386
+
+elaticjob:
+  zookeeper:
+    server-lists: zk-server:3181
+    namespace: monitortask
 
 logging:
   pattern:
